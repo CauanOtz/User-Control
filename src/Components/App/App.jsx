@@ -1,45 +1,49 @@
 import { useState } from 'react';
-import reactLogo from '../../assets/react.svg';
-import viteLogo from '/vite.svg';
 import Saudacao from '../Saudacao/Saudacao';
+import Btn from './Button/btn.jsx';
+import Input from './Inputs/Input.jsx'; // Importe o componente Input
 import './App.css';
 
 function App() {
-  // Inicializando o estado com um array vazio
-  const [nomes, setNomes] = useState([]);
-  const [inputValue, setInputValue] = useState(''); // Estado para controlar o valor do input
+  const [nomesValores, setNomesValores] = useState([]); // Armazena pares de nome e valor
+  const [inputValue, setInputValue] = useState(''); 
+  const [inputValValue, setInputValValue] = useState('');
 
-  // Função para lidar com o valor do input e adicionar um novo nome
-  const handleAddName = () => {
-    if (inputValue.trim() !== '') {
-      // Adiciona o novo nome ao array sem modificar o estado original
-      setNomes([...nomes, inputValue]);
-      setInputValue(''); // Limpa o input após adicionar o nome
+  const handleAdd = () => {
+    if (inputValue.trim() !== '' && inputValValue.trim() !== '') {
+      // Adiciona um novo objeto com nome e valor ao array
+      setNomesValores([...nomesValores, { nome: inputValue, valor: inputValValue }]);
+      setInputValue(''); // Limpa o input do nome
+      setInputValValue(''); // Limpa o input do valor
     }
   };
 
   return (
     <>
       <div>
-        {/* Input controlado pelo estado */}
-        <input 
-          type="text" 
-          id='names'
+        {/* Passando as propriedades para o componente Input */}
+        <Input 
+          id='names' 
           value={inputValue} 
-          onChange={(e) => setInputValue(e.target.value)} // Atualiza o estado quando o input muda
+          onChange={(e) => setInputValue(e.target.value)} 
         />
-
-        {/* Botão que adiciona o nome ao array */}
-        <button onClick={handleAddName}>Adicionar Nome</button>
+        <Input 
+          id='values' 
+          value={inputValValue} 
+          onChange={(e) => setInputValValue(e.target.value)} 
+        />
+        
+        <Btn click={handleAdd} />
       </div>
 
-      {/* Renderiza os nomes adicionados */}
       <div>
-        {nomes.map((nome, index) => (
-          <Saudacao key={index} nome={nome} /> // Passa o nome como prop para o componente Saudacao
+        {nomesValores.map((item, index) => (
+          <div key={index}>
+            <Saudacao nome={item.nome} valor={item.valor} />
+          </div>
         ))}
 
-        {console.log(nomes)}
+        {console.log(nomesValores)}
       </div>
     </>
   );
