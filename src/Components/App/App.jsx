@@ -1,21 +1,35 @@
 import { useState } from 'react';
-import Saudacao from '../Saudacao/Saudacao';
 import Btn from '../Button/btn.jsx';
 import Input from '../Inputs/Input.jsx';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import do Bootstrap
+import 'bootstrap/dist/css/bootstrap.min.css'; 
 import './App.css';
 
 function App() {
   const [nomesValores, setNomesValores] = useState([]); 
   const [inputValue, setInputValue] = useState(''); 
   const [inputValValue, setInputValValue] = useState('');
+  const [inputPercent, setInputPercent] = useState(''); // Novo campo para porcentagem
 
   const handleAdd = () => {
-    if (inputValue.trim() !== '' && inputValValue.trim() !== '') {
-      setNomesValores([...nomesValores, { nome: inputValue, valor: inputValValue }]);
+    if (inputValue.trim() !== '' && inputValValue.trim() !== '' && inputPercent.trim() !== '') {
+      setNomesValores([...nomesValores, { nome: inputValue, valor: inputValValue, crescimento: inputPercent }]);
       setInputValue(''); 
       setInputValValue(''); 
+      setInputPercent(''); 
     }
+  };
+
+  const handleValorChange = (e) => {
+    const valor = e.target.value;
+    const valorFormatado = formatarValorMonetario(valor);
+    setInputValValue(valorFormatado);
+  };
+
+
+  const formatarValorMonetario = (valor) => {
+    const valorLimpo = valor.replace(/\D/g, ""); 
+    const valorNumerico = (Number(valorLimpo) / 100).toFixed(2); 
+    return valorNumerico.replace(".", ","); 
   };
 
   return (
@@ -23,30 +37,39 @@ function App() {
       <div className="container mt-5">
         <div className="card shadow-sm">
           <div className="card-body">
-            <h3 className="card-title text-center mb-4">Cadastro de Nomes e Valores</h3>
+            <h3 className="card-title text-center mb-4">Cadastro de Ações Fictícias</h3>
             <div className="row">
-              {/* Espaçamento melhorado com mb-4 para os inputs */}
-              <div className="mb-4">
+              <div className="col-md-4 mb-4">
                 <Input 
                   id="names" 
                   value={inputValue} 
                   onChange={(e) => setInputValue(e.target.value)} 
-                  placeholder="Digite um nome"
+                  placeholder="Digite o nome"
                   className="form-control"
                 />
               </div>
-              <div className="">
+
+              <div className="col-md-4 mb-4">
                 <Input 
                   id="values" 
                   value={inputValValue} 
-                  onChange={(e) => setInputValValue(e.target.value)} 
-                  placeholder="Digite um valor"
+                  onChange={handleValorChange} // Formatação monetária
+                  placeholder="Digite o valor"
                   className="form-control"
                 />
               </div>
               
-              {/* Alinhando o botão no centro da coluna com d-flex e align-items-center */}
-              <div className="mt-5">
+              <div className="col-md-4 mb-4">
+                <Input 
+                  id="percent" 
+                  value={inputPercent} 
+                  onChange={(e) => setInputPercent(e.target.value)} 
+                  placeholder="Digite o % de crescimento"
+                  className="form-control"
+                />
+              </div>
+              
+              <div className="mt-5 d-flex justify-content-center">
                 <Btn click={handleAdd} className="btn btn-primary w-100 shadow-sm">
                   Adicionar
                 </Btn>
@@ -59,15 +82,19 @@ function App() {
                   <table className="table table-hover table-bordered rounded">
                     <thead className="table-dark">
                       <tr>
+                        <th scope="col">ID</th>
                         <th scope="col">Nome</th>
-                        <th scope="col">Valor</th>
+                        <th scope="col">Valor (R$)</th>
+                        <th scope="col">% Crescimento</th>
                       </tr>
                     </thead>
                     <tbody>
                       {nomesValores.map((item, index) => (
                         <tr key={index}>
+                          <td>{index + 1}</td> 
                           <td>{item.nome}</td>
                           <td>{item.valor}</td>
+                          <td>{item.crescimento}%</td>
                         </tr>
                       ))}
                     </tbody>
@@ -78,7 +105,7 @@ function App() {
 
             {nomesValores.length === 0 && (
               <div className="alert alert-info text-center mt-3">
-                Nenhum nome e valor adicionados ainda.
+                Nenhuma ação adicionada ainda.
               </div>
             )}
           </div>

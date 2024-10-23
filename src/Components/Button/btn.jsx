@@ -1,12 +1,11 @@
-import react, {useState} from 'react';
-function Btn (onClick){
-    return(
-        <>
-            <div>
-                <button onClick={onClick.click}>Adicionar</button>
-            </div>
-        </>
-    )
+import React from 'react';
+
+function Btn({ click, className }) {
+    return (
+        <button onClick={click} className={className || 'btn btn-primary'}>
+            Adicionar
+        </button>
+    );
 }
 
 export default Btn;
