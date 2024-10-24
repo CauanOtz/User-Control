@@ -66,11 +66,12 @@ function App() {
 
   const handleEdit = (index) => {
     const item = nomesValores[index];
+  
     Swal.fire({
       title: 'Editar Ação',
       html:
         `<input id="editName" class="swal2-input" value="${item.nome}" placeholder="Nome">` +
-        `<input id="editValue" class="swal2-input" value="${item.valor}" placeholder="Valor (R$)">` +
+        `<input id="editValue" class="swal2-input" value="${item.valor}" placeholder="Valor (R$)" oninput="this.value = formatarValorMonetario(this.value)">` +
         `<input id="editGrowth" class="swal2-input" value="${item.crescimento}" placeholder="Crescimento (%)">`,
       showCancelButton: true,
       confirmButtonText: 'Salvar',
@@ -93,6 +94,13 @@ function App() {
       }
     });
   };
+  
+  window.formatarValorMonetario = (valor) => {
+    const valorLimpo = valor.replace(/\D/g, ''); 
+    const valorNumerico = (Number(valorLimpo) / 100).toFixed(2); 
+    return valorNumerico.replace(/\B(?=(\d{3})+(?!\d))/g, '.').replace('.', ',');
+  };
+  
 
   // Filtro e Ordenação
   const filteredData = nomesValores
@@ -120,7 +128,7 @@ function App() {
                 <Input 
                   id="values" 
                   value={inputValValue} 
-                  onChange={handleValorChange} // Formatação monetária
+                  onChange={handleValorChange} 
                   placeholder="Digite o valor"
                   className="form-control"
                 />
