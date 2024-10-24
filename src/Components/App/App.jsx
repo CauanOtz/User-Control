@@ -7,17 +7,20 @@ import './App.css';
 
 function App() {
   const [nomesValores, setNomesValores] = useState([]); 
+  const [nextId, setNextId] = useState(1); // Estado para o próximo ID
   const [inputValue, setInputValue] = useState(''); 
   const [inputValValue, setInputValValue] = useState('');
   const [inputPercent, setInputPercent] = useState(''); 
-  const [searchTerm, setSearchTerm] = useState(''); // Filtro (Dps preciso mudar)
-  const [sortOrder, setSortOrder] = useState('asc'); // Ordenação (ascendente/descendente)
+  const [searchTerm, setSearchTerm] = useState(''); // Filtro
+  const [sortOrder, setSortOrder] = useState('asc'); // Ordenação
+  const [recentlyRemoved, setRecentlyRemoved] = useState(null); // Estado para armazenar o item removido
 
   // Armazenando os dados no localStorage
   useEffect(() => {
     const savedData = JSON.parse(localStorage.getItem('nomesValores'));
     if (savedData) {
       setNomesValores(savedData);
+      setNextId(savedData.length > 0 ? Math.max(...savedData.map(item => item.id)) + 1 : 1); // Atualiza o próximo ID
     }
   }, []);
 
@@ -31,22 +34,20 @@ function App() {
       Swal.fire('Erro', 'Todos os campos devem ser preenchidos!', 'error');
       return;
     }
-  
+
     if (!isNaN(inputValue)) {
       Swal.fire('Erro', 'O nome não pode conter números!', 'error');
       return;
     }
-  
-    const novoItem = { nome: inputValue, valor: inputValValue, crescimento: inputPercent };
+
+    const novoItem = { id: nextId, nome: inputValue, valor: inputValValue, crescimento: inputPercent };
     setNomesValores(prevNomesValores => [...prevNomesValores, novoItem]);
+    setNextId(nextId + 1); // Incrementa o próximo ID
     setInputValue('');
     setInputValValue('');
     setInputPercent('');
     Swal.fire('Sucesso', 'Ação adicionada com sucesso!', 'success');
-
-    
   };
-  
 
   const handleValorChange = (e) => {
     const valor = e.target.value;
@@ -57,18 +58,15 @@ function App() {
   const formatarValorMonetario = (valor) => {
     const valorLimpo = valor.replace(/\D/g, ''); 
     const valorNumerico = (Number(valorLimpo) / 100).toFixed(2); 
-  
     return valorNumerico.replace(/\B(?=(\d{3})+(?!\d))/g, '.').replace('.', ',');
   };
   
-
-  const handleRemove = (index) => {
-    const itemRemovido = nomesValores[index]; 
-    const updatedList = nomesValores.filter((_, i) => i !== index);
+  const handleRemove = (id) => {
+    const itemRemovido = nomesValores.find(item => item.id === id);
+    const updatedList = nomesValores.filter(item => item.id !== id);
     setNomesValores(updatedList);
+    setRecentlyRemoved(itemRemovido); // Armazena o item removido
 
-    console.log(index);
-  
     Swal.fire({
       title: 'Removido',
       text: 'Ação removida com sucesso!',
@@ -80,15 +78,18 @@ function App() {
       cancelButtonColor: '#d33',
     }).then((result) => {
       if (result.isConfirmed) {
-        setNomesValores([...updatedList.slice(0, index), itemRemovido, ...updatedList.slice(index)]);
+        // Restaurar o item removido
+        setNomesValores(prevList => [...prevList, itemRemovido]);
+        setRecentlyRemoved(null); // Limpa o item removido
         Swal.fire('Desfeito', 'A ação foi restaurada!', 'success');
+      } else {
+        setRecentlyRemoved(null); // Limpa o item removido
       }
     });
   };
   
-
-  const handleEdit = (index) => {
-    const item = nomesValores[index];
+  const handleEdit = (id) => {
+    const item = nomesValores.find(item => item.id === id);
   
     Swal.fire({
       title: 'Editar Ação',
@@ -110,20 +111,14 @@ function App() {
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        const updatedList = [...nomesValores];
-        updatedList[index] = result.value;
+        const updatedList = nomesValores.map(item => 
+          item.id === id ? { ...item, ...result.value } : item
+        );
         setNomesValores(updatedList);
         Swal.fire('Sucesso', 'Ação editada com sucesso!', 'success');
       }
     });
   };
-  
-  window.formatarValorMonetario = (valor) => {
-    const valorLimpo = valor.replace(/\D/g, ''); 
-    const valorNumerico = (Number(valorLimpo) / 100).toFixed(2); 
-    return valorNumerico.replace(/\B(?=(\d{3})+(?!\d))/g, '.').replace('.', ',');
-  };
-  
 
   // Filtro e Ordenação
   const filteredData = nomesValores
@@ -206,15 +201,15 @@ function App() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredData.map((item, index) => (
-                        <tr key={index}>
-                          <td>{index + 1}</td> 
+                      {filteredData.map((item) => (
+                        <tr key={item.id}>
+                          <td>{item.id}</td> 
                           <td>{item.nome}</td>
                           <td>{item.valor}</td>
                           <td>{item.crescimento}%</td>
                           <td>
-                            <button className="btn btn-warning btn-sm me-2" onClick={() => handleEdit(index)}>Editar</button>
-                            <button className="btn btn-danger btn-sm" onClick={() => handleRemove(index)}>Remover</button>
+                            <button className="btn btn-warning btn-sm me-2" onClick={() => handleEdit(item.id)}>Editar</button>
+                            <button className="btn btn-danger btn-sm" onClick={() => handleRemove(item.id)}>Remover</button>
                           </td>
                         </tr>
                       ))}
