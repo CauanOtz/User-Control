@@ -31,18 +31,22 @@ function App() {
       Swal.fire('Erro', 'Todos os campos devem ser preenchidos!', 'error');
       return;
     }
-
+  
     if (!isNaN(inputValue)) {
       Swal.fire('Erro', 'O nome não pode conter números!', 'error');
       return;
     }
-
-    setNomesValores([...nomesValores, { nome: inputValue, valor: inputValValue, crescimento: inputPercent }]);
+  
+    const novoItem = { nome: inputValue, valor: inputValValue, crescimento: inputPercent };
+    setNomesValores(prevNomesValores => [...prevNomesValores, novoItem]);
     setInputValue('');
     setInputValValue('');
     setInputPercent('');
     Swal.fire('Sucesso', 'Ação adicionada com sucesso!', 'success');
+
+    
   };
+  
 
   const handleValorChange = (e) => {
     const valor = e.target.value;
@@ -62,6 +66,8 @@ function App() {
     const itemRemovido = nomesValores[index]; 
     const updatedList = nomesValores.filter((_, i) => i !== index);
     setNomesValores(updatedList);
+
+    console.log(index);
   
     Swal.fire({
       title: 'Removido',
