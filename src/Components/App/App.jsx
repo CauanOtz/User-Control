@@ -59,10 +59,27 @@ function App() {
   
 
   const handleRemove = (index) => {
+    const itemRemovido = nomesValores[index]; 
     const updatedList = nomesValores.filter((_, i) => i !== index);
     setNomesValores(updatedList);
-    Swal.fire('Removido', 'Ação removida com sucesso!', 'success');
+  
+    Swal.fire({
+      title: 'Removido',
+      text: 'Ação removida com sucesso!',
+      icon: 'success',
+      showCancelButton: true,
+      cancelButtonText: 'Fechar',
+      confirmButtonText: 'Desfazer',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setNomesValores([...updatedList.slice(0, index), itemRemovido, ...updatedList.slice(index)]);
+        Swal.fire('Desfeito', 'A ação foi restaurada!', 'success');
+      }
+    });
   };
+  
 
   const handleEdit = (index) => {
     const item = nomesValores[index];
